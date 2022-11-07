@@ -24,29 +24,39 @@ namespace WebApplicationAPITest.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Users>>> GetUsers([FromQuery] string? sortby = null)
+        public async Task<ActionResult<IEnumerable<Users>>> GetUsers([FromQuery] string? sortby = null, string? email = null, string? phone = null)
         {
+            var contextOperation = _context.Users.Where(x => 1==1);
+            if(email != null)
+            {
+                contextOperation = contextOperation.Where(x => x.Email.Contains(email));  
+            }
+            if(phone != null)
+            {
+                contextOperation = contextOperation.Where(x => string.IsNullOrEmpty(x.PhoneNumber) ? false : x.PhoneNumber.Contains(phone));
+            }
+
             if (sortby != null)
             {
                 switch (sortby)
                 {
                     case "id":
-                        return await _context.Users.OrderBy(x=>x.Id).ToListAsync();
+                        return await contextOperation.OrderBy(x=>x.Id).ToListAsync();
                     case "name":
-                        return await _context.Users.OrderBy(x => x.FullName).ToListAsync();
+                        return await contextOperation.OrderBy(x => x.FullName).ToListAsync();
                     case "email":
-                        return await _context.Users.OrderBy(x => x.Email).ToListAsync();
+                        return await contextOperation.OrderBy(x => x.Email).ToListAsync();
                     case "phone":
-                        return await _context.Users.OrderBy(x => x.PhoneNumber).ToListAsync();
+                        return await contextOperation.OrderBy(x => x.PhoneNumber).ToListAsync();
                     case "age":
-                        return await _context.Users.OrderBy(x => x.Age).ToListAsync();
+                        return await contextOperation.OrderBy(x => x.Age).ToListAsync();
                     default:
                         return BadRequest("sortby valid values are [id,name,email,phone,age]");
                 }
             }
             else
             {
-                return await _context.Users.ToListAsync();
+                return await contextOperation.ToListAsync();
             }
         }
 
